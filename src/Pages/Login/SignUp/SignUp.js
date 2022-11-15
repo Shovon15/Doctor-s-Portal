@@ -1,40 +1,64 @@
 import React, { useContext, useState } from "react";
 import { useForm } from "react-hook-form";
+import toast from "react-hot-toast";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../../Context/AuthContext/AuthContext";
 
-const Login = () => {
+const SignUp = () => {
     const {
         register,
-        formState: { errors },
         handleSubmit,
+        formState: { errors },
     } = useForm();
-    const { signIn } = useContext(AuthContext);
-    const [loginError, setLoginError] = useState("");
-    const location = useLocation();
-    const navigate = useNavigate();
 
+    const [signUpError, setSignUpError] = useState("");
+    const { createUser, updateUser } = useContext(AuthContext);
+    const navigate = useNavigate();
+    const location = useLocation();
     const from = location.state?.from?.pathname || "/";
 
-    const handleLogin = (data) => {
-        console.log(data);
-        setLoginError(""); //for previous error reset
-        signIn(data.email, data.password)
+    const handleSignUp = (data) => {
+        // console.log(data);
+        createUser(data.email, data.password)
             .then((result) => {
                 const user = result.user;
                 console.log(user);
+                toast.success("signup successfully");
+
+                const userInfo = {
+                    displayName: data.name,
+                };
+                updateUser(userInfo)
+                    .then(() => {})
+                    .catch((err) => console.log(err));
                 navigate(from, { replace: true });
+
+                // from.reset();
             })
             .catch((error) => {
                 console.log(error.message);
-                setLoginError(error.message);
+                setSignUpError(error.message);
             });
     };
+
     return (
         <div className="h-[800px] flex justify-center items-center  ">
             <div className="w-96 p-7 shadow-2xl rounded-xl bg-slate-100">
-                <h2 className="text-xl text-center">Login</h2>
-                <form onSubmit={handleSubmit(handleLogin)}>
+                <h2 className="text-xl text-center">SignUp</h2>
+                <form onSubmit={handleSubmit(handleSignUp)}>
+                    <div className="form-control w-full max-w-xs">
+                        <label className="label">
+                            <span className="label-text">Name</span>
+                        </label>
+                        <input
+                            type="name"
+                            {...register("name", {
+                                required: "Name is required",
+                            })}
+                            className="input input-bordered w-full max-w-xs"
+                        />
+                        {errors.name && <p className="text-red-600">{errors.name?.message}</p>}
+                    </div>
                     <div className="form-control w-full max-w-xs">
                         <label className="label">
                             <span className="label-text">Email</span>
@@ -60,18 +84,16 @@ const Login = () => {
                             })}
                             className="input input-bordered w-full max-w-xs"
                         />
-                        <label className="label">
-                            <span className="label-text">Forget Password?</span>
-                        </label>
+
                         {errors.password && <p className="text-red-600">{errors.password?.message}</p>}
                     </div>
-                    <div>{loginError && <p className="text-red-600 py-3">{loginError.slice(10)}</p>}</div>
-                    <input className="btn btn-accent w-full" value="Login" type="submit" />
+                    <div>{signUpError && <p className="text-red-600">{signUpError}</p>}</div>
+                    <input className="btn btn-accent w-full my-8" value="signin" type="submit" />
                 </form>
-                <p>
-                    New to Doctors Portal
-                    <Link className="text-secondary" to="/signup">
-                        Create new Account
+                <p className="m-2">
+                    Already have an Account
+                    <Link className="text-secondary px-2" to="/login">
+                        Login
                     </Link>
                 </p>
                 <div className="divider">OR</div>
@@ -81,4 +103,4 @@ const Login = () => {
     );
 };
 
-export default Login;
+export default SignUp;
