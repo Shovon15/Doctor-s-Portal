@@ -15,10 +15,12 @@ const SignUp = () => {
     const { createUser, updateUser } = useContext(AuthContext);
     const navigate = useNavigate();
     const location = useLocation();
+
     const from = location.state?.from?.pathname || "/";
 
     const handleSignUp = (data) => {
         // console.log(data);
+        setSignUpError("");
         createUser(data.email, data.password)
             .then((result) => {
                 const user = result.user;
@@ -29,15 +31,40 @@ const SignUp = () => {
                     displayName: data.name,
                 };
                 updateUser(userInfo)
-                    .then(() => {})
+                    .then(() => {
+                        userSaveInDB(data.name, data.email);
+                    })
                     .catch((err) => console.log(err));
-                navigate(from, { replace: true });
 
                 // from.reset();
             })
             .catch((error) => {
                 console.log(error.message);
                 setSignUpError(error.message);
+            });
+    };
+
+    const userSaveInDB = (name, email) => {
+        const users = { name, email };
+
+        fetch("http://localhost:5000/users", {
+            method: "POST",
+            headers: {
+                "content-type": "application/json",
+            },
+            body: JSON.stringify(users),
+        })
+            .then((res) => res.json())
+            .then((data) => {
+                console.log("userSaveDb", data);
+                navigate(from, { replace: true });
+                // if (data.acknowledged) {
+                //     setTreatment(null);
+                //     toast.success("Booking confirmed");
+                //     refetch();
+                // } else {
+                //     toast.error(data.message);
+                // }
             });
     };
 

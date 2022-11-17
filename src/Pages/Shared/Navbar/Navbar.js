@@ -1,15 +1,36 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import { Link } from "react-router-dom";
 import { AuthContext } from "../../../Context/AuthContext/AuthContext";
+import { FaMoon, FaSun, FaUser } from "react-icons/fa";
+import { useEffect } from "react";
+import toast from "react-hot-toast";
 
 const Navbar = () => {
     const { user, logOut } = useContext(AuthContext);
-    console.log(user);
+
+    const [theme, setTheme] = useState("light");
+
+    useEffect(() => {
+        if (theme === "dark") {
+            document.documentElement.classList.add("dark");
+        } else {
+            document.documentElement.classList.remove("dark");
+        }
+    }, [theme]);
+
+    const handleThemeSwitch = () => {
+        setTheme(theme === "dark" ? "light" : "dark");
+    };
+
+    // console.log(theme);
     const handleLogOut = () => {
         logOut()
-            .than(() => {})
+            .than(() => {
+                toast.success("Logout");
+            })
             .catch((err) => console.log(err));
     };
+
     const menuItems = (
         <>
             <Link to="/">
@@ -36,30 +57,47 @@ const Navbar = () => {
     );
     const userItem = (
         <>
-            <div className="dropdown dropdown-end">
-                <label tabIndex={1} className="btn btn-ghost btn-circle avatar">
-                    <div className="w-10 rounded-full">
-                        <img src="https://placeimg.com/80/80/people" alt="userProfile" />
-                    </div>
-                </label>
-                <ul
-                    tabIndex={1}
-                    className="mt-3 p-2 shadow menu menu-compact dropdown-content bg-base-100 rounded-box w-52"
-                >
-                    <li>
-                        <Link to="/" className="justify-between">
-                            Profile
-                            <span className="badge">New</span>
-                        </Link>
-                    </li>
-                    <li>
-                        <Link to="/">Settings</Link>
-                    </li>
-                    <li>
-                        <Link to="/">Logout</Link>
-                    </li>
-                </ul>
-            </div>
+            <button onClick={handleThemeSwitch} className="btn btn-ghost p-0 rounded-full bg-slate-400  mr-12">
+                {theme === "dark" ? (
+                    <span className=" dark:text-white">
+                        <FaSun className="w-6 h-6 mx-3" />
+                    </span>
+                ) : (
+                    <span className="">
+                        <FaMoon className="w-6 h-6 mx-3" />
+                    </span>
+                )}
+            </button>
+            {user?.uid ? (
+                <div className="dropdown dropdown-end">
+                    <label tabIndex={1} className="btn btn-ghost btn-circle avatar">
+                        <div className="w-10 rounded-full">
+                            {user?.photoURL ? <p>ase</p> : <FaUser className="w-8 h-8 m-auto" />}
+                        </div>
+                    </label>
+                    <ul
+                        tabIndex={1}
+                        className="mt-3 p-2 shadow menu menu-compact dropdown-content bg-base-100 rounded-box w-52"
+                    >
+                        <li className="px-2">{user?.displayName}</li>
+
+                        <li>
+                            <Link to="/" className="justify-between">
+                                Profile
+                                <span className="badge">New</span>
+                            </Link>
+                        </li>
+                        <li>
+                            <Link to="/">Settings</Link>
+                        </li>
+                        <li>
+                            <Link onClick={handleLogOut}>Logout</Link>
+                        </li>
+                    </ul>
+                </div>
+            ) : (
+                <></>
+            )}
         </>
     );
 
@@ -97,6 +135,21 @@ const Navbar = () => {
                 <ul className="menu menu-horizontal p-0">{menuItems}</ul>
             </div>
             <div className="navbar-end">{userItem}</div>
+            <label htmlFor="dashboard-drawer" tabIndex={2} className="btn btn-ghost lg:hidden">
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    className="inline-block w-5 h-5 stroke-current"
+                >
+                    <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M4 6h16M4 12h16M4 18h16"
+                    ></path>
+                </svg>
+            </label>
         </div>
     );
 };

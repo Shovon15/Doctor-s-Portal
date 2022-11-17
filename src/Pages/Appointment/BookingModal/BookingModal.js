@@ -1,16 +1,22 @@
 import { format } from "date-fns";
-import React from "react";
+import React, { useContext } from "react";
+import toast from "react-hot-toast";
+import { AuthContext } from "../../../Context/AuthContext/AuthContext";
 
-const BookingModal = ({ treatment, selectedDate, setTreatment }) => {
+const BookingModal = ({ treatment, selectedDate, setTreatment, refetch }) => {
+    const { user } = useContext(AuthContext);
     const { name, slots } = treatment;
     const date = format(selectedDate, "PP");
+
     const handleBooking = (event) => {
         event.preventDefault();
+
         const form = event.target;
         const slot = form.slot.value;
         const patientName = form.name.value;
         const email = form.email.value;
         const phone = form.phone.value;
+
         // [3, 4, 5].map((value, i) => console.log(value))
         const booking = {
             appointmentDate: date,
@@ -24,9 +30,27 @@ const BookingModal = ({ treatment, selectedDate, setTreatment }) => {
         // TODO: send data to the server
         // and once data is saved then close the modal
         // and display success toast
-        console.log(booking);
-        setTreatment(null);
+
+        fetch("http://localhost:5000/bookings", {
+            method: "POST",
+            headers: {
+                "content-type": "application/json",
+            },
+            body: JSON.stringify(booking),
+        })
+            .then((res) => res.json())
+            .then((data) => {
+                console.log(data);
+                if (data.acknowledged) {
+                    setTreatment(null);
+                    toast.success("Booking confirmed");
+                    refetch();
+                } else {
+                    toast.error(data.message);
+                }
+            });
     };
+
     return (
         <>
             <input type="checkbox" id="booking-modal" className="modal-toggle" />
@@ -47,15 +71,17 @@ const BookingModal = ({ treatment, selectedDate, setTreatment }) => {
                         </select>
                         <input
                             name="name"
+                            value={user?.displayName}
                             type="text"
-                            placeholder="Your Name"
                             className="input w-full input-bordered"
+                            disabled
                         />
                         <input
                             name="email"
+                            value={user?.email}
                             type="email"
-                            placeholder="Email Address"
                             className="input w-full input-bordered"
+                            disabled
                         />
                         <input
                             name="phone"
