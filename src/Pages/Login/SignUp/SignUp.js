@@ -47,7 +47,7 @@ const SignUp = () => {
     const userSaveInDB = (name, email) => {
         const users = { name, email };
 
-        fetch("http://localhost:5000/users", {
+        fetch("https://doctors-portal-server-seven-gamma.vercel.app/users", {
             method: "POST",
             headers: {
                 "content-type": "application/json",
@@ -57,7 +57,7 @@ const SignUp = () => {
             .then((res) => res.json())
             .then((data) => {
                 console.log("userSaveDb", data);
-                navigate(from, { replace: true });
+                getUserToken(email);
                 // if (data.acknowledged) {
                 //     setTreatment(null);
                 //     toast.success("Booking confirmed");
@@ -65,6 +65,17 @@ const SignUp = () => {
                 // } else {
                 //     toast.error(data.message);
                 // }
+            });
+    };
+
+    const getUserToken = (email) => {
+        fetch(`https://doctors-portal-server-seven-gamma.vercel.app/jwt?email=${email}`)
+            .then((res) => res.json())
+            .then((data) => {
+                if (data.accessToken) {
+                    localStorage.setItem("accessToken", data.accessToken);
+                    navigate(from, { replace: true });
+                }
             });
     };
 

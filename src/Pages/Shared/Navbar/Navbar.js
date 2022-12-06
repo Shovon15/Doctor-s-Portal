@@ -25,7 +25,7 @@ const Navbar = () => {
     // console.log(theme);
     const handleLogOut = () => {
         logOut()
-            .than(() => {
+            .then(() => {
                 toast.success("Logout");
             })
             .catch((err) => console.log(err));
@@ -40,9 +40,15 @@ const Navbar = () => {
                 <button className="btn btn-ghost w-full">Appointment</button>
             </Link>
             {user?.uid ? (
-                <button onClick={handleLogOut} className="btn btn-ghost">
-                    SignOut
-                </button>
+                <>
+                    <Link to="/dashboard">
+                        <button className="btn btn-ghost w-full">Dashboard</button>
+                    </Link>
+
+                    <button onClick={handleLogOut} className="btn btn-ghost">
+                        SignOut
+                    </button>
+                </>
             ) : (
                 <>
                     <Link to="/login">
@@ -72,7 +78,11 @@ const Navbar = () => {
                 <div className="dropdown dropdown-end">
                     <label tabIndex={1} className="btn btn-ghost btn-circle avatar">
                         <div className="w-10 rounded-full">
-                            {user?.photoURL ? <p>ase</p> : <FaUser className="w-8 h-8 m-auto" />}
+                            {user?.photoURL ? (
+                                <img src={user?.photoURL} alt="user" className="w-10 h-10 rounded-full"></img>
+                            ) : (
+                                <FaUser className="w-8 h-8 m-auto" />
+                            )}
                         </div>
                     </label>
                     <ul
